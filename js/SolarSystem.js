@@ -75,6 +75,9 @@ define(
         */
        update() {
          function genOrbitBodyFunc(sun, planet) {
+           // original code from here:
+           //   https://nbodyphysics.com/blog/2016/05/29/planetary-orbits-in-javascript/
+
            var m = sun.mass + planet.mass // combined mass of sun and planet
            var x_offset = sun.position.x;
            var y_offset = sun.position.y;
