@@ -1,0 +1,23 @@
+{
+  "name": "space-explorers",
+  "version": "0.0.1",
+  "description": "a game about exploring space",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "keywords": [
+    "game",
+    "space",
+    "exploration",
+    "fun",
+    "plants"
+  ],
+  "author": "Gregory Venezia",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "nodemon": "^2.0.7"
+  }
+}
