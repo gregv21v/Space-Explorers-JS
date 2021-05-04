@@ -8,6 +8,7 @@ requirejs.config({
     paths: {
         game: "../js",
         planets:  "../js/planets",
+        spaceships: "../js/spaceships",
         jquery: "jquery-3.5.1",
         d3: "d3.min"
     }

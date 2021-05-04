@@ -14,7 +14,9 @@ define(
          this._position = position; // the position of the planet
          this._radius = radius; // the radius of the planet
          this._mass = mass; // mass of the planet
-         this._distanceFromSun = 80; // the distance from sun
+         this._aOrbitRadius = 80; // the distance from sun
+         this._bOrbitRadius = 80;
+         this._time = 0;
 
          this._color = "red"
 
@@ -46,6 +48,53 @@ define(
          addGraphicsTo(group) {
            group.append(() => this._svg.group.node())
          }
+
+        /**
+         * update()
+         * @description updates this planet
+         */
+        update(solarSystem) {
+          // original code from here:
+          //   https://nbodyphysics.com/blog/2016/05/29/planetary-orbits-in-javascript/
+
+          var m = solarSystem.sun.mass + this.mass // combined mass of sun and planet
+          var e = 0.7; // effects the shape of the
+          var tickSpeed = 0.3
+
+          var LOOP_LIMIT = 10;
+
+          var orbitPeriod = 2.0 * Math.PI * Math.sqrt(Math.pow(this.aOrbitRadius, 3)/(m*m)); // G=1
+
+          // 1) find the relative time in the orbit and convert to Radians
+          let M = 2.0 * Math.PI * this._time/orbitPeriod;
+
+          // 2) Seed with mean anomaly and solve Kepler's eqn for E
+          let u = M; // seed with mean anomoly
+          let u_next = 0;
+          let loopCount = 0;
+          // iterate until within 10-6
+          while(loopCount++ < LOOP_LIMIT) {
+            // this should always converge in a small number of iterations - but be paranoid
+            u_next = u + (M - (u - e * Math.sin(u)))/(1 - e * Math.cos(u));
+            if (Math.abs(u_next - u) < 1E-6)
+               break;
+            u = u_next;
+          }
+
+           // 2) eccentric anomoly is angle from center of ellipse, not focus (where centerObject is). Convert
+           // to true anomoly, f - the angle measured from the focus. (see Fig 3.2 in Gravity)
+           var cos_f = (Math.cos(u) - e)/(1 - e * Math.cos(u));
+           var sin_f = (Math.sqrt(1 - e*e) * Math.sin (u))/(1 - e * Math.cos(u));
+           var r = this.aOrbitRadius * (1 - e*e)/(1 + e * cos_f);
+
+           this._time = this._time + tickSpeed;
+           // animate
+           //console.log(self._planets[0].position);
+           this.position = {
+             x: solarSystem.sun.position.x + r * cos_f,
+             y: solarSystem.sun.position.y + r * sin_f
+           }
+        }
 
         /********************************************************
                           Getters and Setters
@@ -126,20 +175,37 @@ define(
         }
 
         /**
-         * get distanceFromSun
-         * @description gets the distanceFromSun of the planet
+         * get aOrbitRadius
+         * @description gets the aOrbitRadius of the planet
          */
-        get distanceFromSun() {
-          return this._distanceFromSun
+        get aOrbitRadius() {
+          return this._aOrbitRadius
         }
 
         /**
-         * set distanceFromSun
-         * @description sets the distanceFromSun of the planet
-         * @param value the value to set the distanceFromSun to
+         * set aOrbitRadius
+         * @description sets the aOrbitRadius of the planet
+         * @param value the value to set the aOrbitRadius to
          */
-        set distanceFromSun(value) {
-          this._distanceFromSun = value
+        set aOrbitRadius(value) {
+          this._aOrbitRadius = value
+        }
+
+        /**
+         * get bOrbitRadius
+         * @description gets the bOrbitRadius of the planet
+         */
+        get bOrbitRadius() {
+          return this._bOrbitRadius
+        }
+
+        /**
+         * set bOrbitRadius
+         * @description sets the bOrbitRadius of the planet
+         * @param value the value to set the bOrbitRadius to
+         */
+        set bOrbitRadius(value) {
+          this._bOrbitRadius = value
         }
     }
   }

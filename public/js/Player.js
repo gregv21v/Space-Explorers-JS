@@ -1,6 +1,6 @@
 define(
-  [],
-  function() {
+  ["spaceships/SpaceShip"],
+  function(SpaceShip) {
     /**
       Player - the player playing the game
     */
@@ -11,7 +11,11 @@ define(
        *
        */
        constructor() {
-
+         this.spaceship = new SpaceShip(
+           {x: window.innerWidth / 2, y: window.innerHeight / 2},
+           5,
+           100
+         )
        }
     }
   }
