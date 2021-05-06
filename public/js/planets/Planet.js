@@ -18,7 +18,29 @@ define(
          this._bOrbitRadius = 80;
          this._time = 0;
 
+         this._selected = false;
+
          this._color = "red"
+
+         let svg = d3.select("body").select("svg")
+         let defs = svg.append("defs");
+
+    		 //Create a radial Sun-like gradient
+    		 defs.append("radialGradient")
+          .attr("id", "planet-gradient")
+          .attr("cx", "75%")	//not really needed, since 50% is the default
+          .attr("cy", "50%")	//not really needed, since 50% is the default
+          .attr("r", "50%")	//not really needed, since 50% is the default
+          .selectAll("stop")
+          .data([
+          		{offset: "0%", color: "#FFF76B"},
+          		{offset: "50%", color: "#FFF845"},
+          		{offset: "90%", color: "#ba382f"},
+          		{offset: "100%", color: "#FB8933"}
+          	])
+          .enter().append("stop")
+          .attr("offset", function(d) { return d.offset; })
+          .attr("stop-color", function(d) { return d.color; });
 
          this._svg = {
            group: d3.create("svg:g")
@@ -37,6 +59,12 @@ define(
             .attr("cy", this._position.y)
             .attr("r", this._radius)
             .style("fill", this._color)
+            .style("fill", "url(#planet-gradient)")
+
+          let self = this;
+          this._svg.circle.on("click", function() {
+            self.onClick()
+          })
         }
 
         /**
@@ -207,6 +235,39 @@ define(
         set bOrbitRadius(value) {
           this._bOrbitRadius = value
         }
+
+        /**
+         * select()
+         * @description selects this planet
+         */
+        select() {
+          this._svg.circle
+            .style("stroke", "green")
+            .style("stroke-width", 3)
+        }
+
+        /**
+         * deselect()
+         * @description deselects this planet
+         */
+        deselect() {
+          this._svg.circle
+            .style("stroke-width", 0)
+        }
+
+
+        /**
+         * onClick()
+         * @description triggered when the planet is clicked
+         */
+         onClick() {
+           if(this._selected) {
+             this.deselect()
+           } else {
+             this.select()
+           }
+           this._selected = !this._selected;
+         }
     }
   }
 )

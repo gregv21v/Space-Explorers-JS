@@ -14,15 +14,17 @@ define(
          this._position = position; // the position of the SpaceShip
          this._radius = radius; // the radius of the SpaceShip
          this._mass = mass; // mass of the SpaceShip
-         this._velocity = {x: 0.1, y: 0.1}
-         this._acceleration = {x: 1, y: 0}
+         this._velocity = {x: 0.1, y: 0.1} // directional velocity
+         this._speed = 0.5;
+         this._acceleration = {x: 0, y: 0}
 
          this._color = "red"
 
          this._svg = {
-           group: d3.create("svg:g")
+           group: d3.create("svg:g"),
+           triangle: null
          }
-         this._svg["circle"] = this._svg.group.append("circle")
+         this._svg.triangle = this._svg.group.append("path")
        }
 
 
@@ -31,10 +33,15 @@ define(
         * @description initializes the svgs of the world
         */
         initSVG() {
-          this._svg.circle
-            .attr("cx", this._position.x)
-            .attr("cy", this._position.y)
-            .attr("r", this._radius)
+          let path = d3.path();
+
+          path.moveTo(this._position.x, this._position.y)
+          path.lineTo(this._position.x + 10, this._position.y + 20)
+          path.lineTo(this._position.x - 10, this._position.y + 20)
+          path.lineTo(this._position.x, this._position.y)
+
+          this._svg.triangle
+            .attr("d", path)
             .style("fill", this._color)
         }
 
@@ -60,6 +67,20 @@ define(
 
            this._velocity.x += this._acceleration.x
            this._velocity.y += this._acceleration.y
+         }
+
+         /**
+          * moveTowards()
+          * @description move towards a given planet
+          * @param planet the planet to move towards
+          */
+         moveTowards(planet) {
+           let dx = planet.position.x - this.position.x
+           let dy = planet.position.y - this.position.y
+           let angle = Math.atan(dy, dx)
+
+           this._velocity.x = this._speed * Math.cos(angle)
+           this._velocity.y = this._speed * Math.sin(angle)
          }
 
         /********************************************************

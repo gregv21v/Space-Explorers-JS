@@ -17,7 +17,7 @@ define(
          this._svg = {
            group: d3.create("svg:g")
          }
-         this._sun = new Sun(position, 20, 80);
+         this._sun = new Sun(position, 40, 80);
          this._sun.addGraphicsTo(this._svg.group)
          this._sun.initSVG()
 
@@ -32,11 +32,11 @@ define(
            )
         )
 
-         let planet1 = new Planet({x: position.x + 20, y: position.y + 20}, 8, 40)
+         let planet1 = new Planet({x: position.x + 40, y: position.y + 40}, 16, 80)
          planet1.color = "blue"
-         planet1.aOrbitRadius = 40
+         planet1.aOrbitRadius = 40 + 80
          this.addPlanet(planet1)
-         this.addPlanet(new Planet({x: position.x + 30, y: position.y + 20}, 10, 50))
+         this.addPlanet(new Planet({x: position.x + 40, y: position.y + 40}, 20, 100))
        }
 
 
@@ -122,6 +122,8 @@ define(
 
              for (var i = 0; i < self._spaceships.length; i++) {
                self._spaceships[i].update()
+
+               self._spaceships[i].moveTowards(self._planets[0])
              }
            },
            60

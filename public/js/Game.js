@@ -23,7 +23,7 @@ define(
          var self = this;
 
          window.addEventListener("resize", function() {
-            self.svgMain
+            self._svgMain
               .attr("width", self.width)
               .attr("height", self.height)
 
