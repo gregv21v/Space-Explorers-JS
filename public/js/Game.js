@@ -8,7 +8,6 @@ define(
       /**
        * constructor()
        * @description constructs the game
-       *
        */
        constructor() {
          this._player = new Player()

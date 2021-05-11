@@ -24,7 +24,7 @@ define(
          this._planets = []
          let planet1 = new Planet({x: position.x + 20, y: position.y + 20}, 4, 40)
          planet1.color = "blue"
-         planet1.distanceFromSun = 40
+         planet1.distanceFromSun = 100
          this.addPlanet(planet1)
          this.addPlanet(new Planet({x: position.x + 30, y: position.y + 20}, 5, 50))
        }
