@@ -1,5 +1,5 @@
 define(
-  ["d3", "planets/Planet", "planets/Sun", "spaceships/SpaceShip"],
+  ["d3", "celestialBodies/Planet", "celestialBodies/Sun", "spaceships/SpaceShip"],
   function(d3, Planet, Sun, SpaceShip) {
     /**
       World - contains all the game objects
@@ -24,19 +24,51 @@ define(
          this._spaceships = []
          this._planets = []
 
-         this.addSpaceShip(
-           new SpaceShip(
-             {x: window.innerWidth / 2, y: window.innerHeight / 2},
-             5,
-             100
-           )
-        )
 
-         let planet1 = new Planet({x: position.x + 40, y: position.y + 40}, 16, 80)
-         planet1.color = "blue"
-         planet1.aOrbitRadius = 40 + 80
-         this.addPlanet(planet1)
-         this.addPlanet(new Planet({x: position.x + 40, y: position.y + 40}, 20, 100))
+
+
+         let mercury = new Planet({x: position.x, y: position.y}, 10, 80)
+         mercury.aOrbitRadius = 60
+
+         let venus = new Planet({x: position.x, y: position.y}, 10, 80)
+         venus.aOrbitRadius = 80
+         venus.color = "lightblue"
+
+         let earth = new Planet({x: position.x, y: position.y}, 10, 80)
+         earth.aOrbitRadius = 100
+         earth.color = "green"
+
+         let jupiter = new Planet({x: position.x, y: position.y}, 20, 80)
+         jupiter.aOrbitRadius = 130
+         jupiter.color = "orange"
+
+         let saturn = new Planet({x: position.x, y: position.y}, 20, 80)
+         saturn.aOrbitRadius = 180
+         saturn.color = "blue"
+
+         let uranus = new Planet({x: position.x, y: position.y}, 10, 80)
+         uranus.aOrbitRadius = 210
+         uranus.color = "blue"
+
+         let neptune = new Planet({x: position.x, y: position.y}, 10, 80)
+         neptune.aOrbitRadius = 230
+         neptune.color = "blue"
+
+         let starterShip = new SpaceShip(
+           earth,
+           {x: window.innerWidth / 2, y: window.innerHeight / 2},
+           5,
+           10
+         )
+
+         this.addPlanet(mercury)
+         this.addPlanet(venus)
+         this.addPlanet(earth)
+         this.addPlanet(jupiter)
+         this.addPlanet(saturn)
+         this.addPlanet(uranus)
+         this.addPlanet(neptune)
+         this.addSpaceShip(starterShip)
        }
 
 
@@ -60,9 +92,33 @@ define(
        addPlanet(planet) {
          this._planets.push(planet)
 
+         planet.solarSystem = this;
          planet.addGraphicsTo(this._svg.group)
          planet.initSVG();
        }
+
+
+       /**
+        * zoom()
+        * @description zooms in or out of on the solar system scaling by a factor
+        *  of scale. Zoom in by giving a number above 1, and Zoom out by giving
+        *  a number between 0 and 1
+        * @param scale the factor to scale by zoom or out by
+        */
+       zoom(scale) {
+         for (let spaceship of this._spaceships) {
+           spaceship.scale(scale)
+         }
+         this._sun.radius *= scale;
+         for (let planet of this._planets) {
+           planet.aOrbitRadius *= scale;
+           planet.radius *= scale;
+         }
+       }
+
+       /********************************************************
+                         Getters and Setters
+       *********************************************************/
 
 
        /**
@@ -111,23 +167,18 @@ define(
         * update
         * @description update the graphics of the solar system
         */
-       update() {
+       update(time) {
          // for each planet in the solar system, update its position
-         var self = this;
-         setInterval(
-           function() {
-             for (var i = 0; i < self._planets.length; i++) {
-               self._planets[i].update(self);
-             }
+         for (var i = 0; i < this._planets.length; i++) {
+           this._planets[i].update(time, this);
+         }
 
-             for (var i = 0; i < self._spaceships.length; i++) {
-               self._spaceships[i].update()
+         for (var i = 0; i < this._spaceships.length; i++) {
+           //this._spaceships[i].update()
 
-               self._spaceships[i].moveTowards(self._planets[0])
-             }
-           },
-           60
-         )
+           //this._spaceships[i].travelTo(this._planets[0])
+           this._spaceships[i].orbit(time)
+         }
        }
      }
   }

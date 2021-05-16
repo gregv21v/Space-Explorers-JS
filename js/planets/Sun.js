@@ -15,26 +15,6 @@ define(
          this._radius = radius; // the radius of the sun
          this._mass = mass; // mass of the sun
 
-
-         let svg = d3.select("body").select("svg")
-         let defs = svg.append("defs");
-
-    		 //Create a radial Sun-like gradient
-    		 defs.append("radialGradient")
-          .attr("id", "sun-gradient")
-          .attr("cx", "75%")	//not really needed, since 50% is the default
-          .attr("cy", "50%")	//not really needed, since 50% is the default
-          .attr("r", "50%")	//not really needed, since 50% is the default
-          .selectAll("stop")
-          .data([
-          		{offset: "0%", color: "#FFF76B"},
-          		{offset: "50%", color: "#FFF845"},
-          		{offset: "90%", color: "#FFDA4E"},
-          		{offset: "100%", color: "#FB8933"}
-          	])
-          .enter().append("stop")
-          .attr("offset", function(d) { return d.offset; })
-          .attr("stop-color", function(d) { return d.color; });
          this._svg = {
            group: d3.create("svg:g")
          }
@@ -47,12 +27,11 @@ define(
         * @description initializes the svgs of the world
         */
         initSVG() {
-
           this._svg.circle
             .attr("cx", this._position.x)
             .attr("cy", this._position.y)
             .attr("r", this._radius)
-            .style("fill", "url(#sun-gradient)")
+            .style("fill", "yellow")
         }
 
         /**

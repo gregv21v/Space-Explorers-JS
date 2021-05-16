@@ -3,4 +3,5 @@ define(["game/Game"], function(Game) {
   let game = new Game()
 
   game.initSVG()
+  game.update();
 })

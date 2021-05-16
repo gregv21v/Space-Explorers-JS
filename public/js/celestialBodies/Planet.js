@@ -4,16 +4,16 @@ define(
     /**
       Planet
     */
-    return class Planet {
+    return class Planet extends PhysicsBody {
       /**
        * constructor()
        * @description constructs the Planet
        * @param position the position of the planet
        */
        constructor(position, radius, mass) {
-         this._position = position; // the position of the planet
+         super(position, mass)
+         this._solarSystem = null; // the solar system this planet is part of
          this._radius = radius; // the radius of the planet
-         this._mass = mass; // mass of the planet
          this._aOrbitRadius = 80; // the distance from sun
          this._bOrbitRadius = 80;
          this._time = 0;
@@ -59,7 +59,6 @@ define(
             .attr("cy", this._position.y)
             .attr("r", this._radius)
             .style("fill", this._color)
-            .style("fill", "url(#planet-gradient)")
 
           let self = this;
           this._svg.circle.on("click", function() {
@@ -77,24 +76,35 @@ define(
            group.append(() => this._svg.group.node())
          }
 
+         /**
+          * orbitAround()
+          * @description causes this planet to orbit around another celestial body
+          *  in a circular orbit
+          * @param celestialBody the celestialBody to orbit around
+          * @param radius the radius between the center of the celestialBody, and
+          *   and this celestialBody
+          */
+         orbitAround(celestialBody, radius) {
+
+         }
+
         /**
          * update()
          * @description updates this planet
          */
-        update(solarSystem) {
+        update(time, solarSystem) {
           // original code from here:
           //   https://nbodyphysics.com/blog/2016/05/29/planetary-orbits-in-javascript/
 
           var m = solarSystem.sun.mass + this.mass // combined mass of sun and planet
-          var e = 0.7; // effects the shape of the
-          var tickSpeed = 0.3
+          var e = 0.0; // effects the shape of the
 
           var LOOP_LIMIT = 10;
 
           var orbitPeriod = 2.0 * Math.PI * Math.sqrt(Math.pow(this.aOrbitRadius, 3)/(m*m)); // G=1
 
           // 1) find the relative time in the orbit and convert to Radians
-          let M = 2.0 * Math.PI * this._time/orbitPeriod;
+          let M = 2.0 * Math.PI * time/orbitPeriod;
 
           // 2) Seed with mean anomaly and solve Kepler's eqn for E
           let u = M; // seed with mean anomoly
@@ -115,7 +125,6 @@ define(
            var sin_f = (Math.sqrt(1 - e*e) * Math.sin (u))/(1 - e * Math.cos(u));
            var r = this.aOrbitRadius * (1 - e*e)/(1 + e * cos_f);
 
-           this._time = this._time + tickSpeed;
            // animate
            //console.log(self._planets[0].position);
            this.position = {
@@ -143,6 +152,8 @@ define(
          */
         set radius(value) {
           this._radius = value
+
+          this._svg.circle.attr("r", this._radius)
         }
 
         /**
@@ -237,6 +248,23 @@ define(
         }
 
         /**
+         * set solarSystem
+         * @description sets the solarSystem of this planet
+         * @param value solarSystem to set to
+         */
+        set solarSystem(value) {
+          this._solarSystem = value;
+        }
+
+        /**
+         * get solarSystem
+         * @description gets the solarSystem of this planet
+         */
+        get solarSystem() {
+          return this._solarSystem;
+        }
+
+        /**
          * select()
          * @description selects this planet
          */
@@ -262,10 +290,12 @@ define(
          */
          onClick() {
            if(this._selected) {
+
              this.deselect()
            } else {
              this.select()
            }
+           this.solarSystem.spaceship.travelTo(this)
            this._selected = !this._selected;
          }
     }

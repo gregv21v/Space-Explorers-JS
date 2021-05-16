@@ -7,7 +7,7 @@ requirejs.config({
     baseUrl: 'lib',
     paths: {
         game: "../js",
-        planets:  "../js/planets",
+        celestialBodies:  "../js/celestialBodies",
         spaceships: "../js/spaceships",
         jquery: "jquery-3.5.1",
         d3: "d3.min"

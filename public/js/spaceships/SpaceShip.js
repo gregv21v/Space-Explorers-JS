@@ -8,15 +8,20 @@ define(
       /**
        * constructor()
        * @description constructs the Planet
+       * @param planet the planet this SpaceShip is orbiting
        * @param position the position of the planet
+       * @param size the size dimension of this SpaceShip
+       * @param mass the mass of this space ship
        */
-       constructor(position, radius, mass) {
+       constructor(planet, position, size, mass) {
+         this._planet = planet;
          this._position = position; // the position of the SpaceShip
-         this._radius = radius; // the radius of the SpaceShip
+         this._size = size; // the size of the SpaceShip
          this._mass = mass; // mass of the SpaceShip
          this._velocity = {x: 0.1, y: 0.1} // directional velocity
          this._speed = 0.5;
          this._acceleration = {x: 0, y: 0}
+         this._angle = 45;
 
          this._color = "red"
 
@@ -35,14 +40,38 @@ define(
         initSVG() {
           let path = d3.path();
 
-          path.moveTo(this._position.x, this._position.y)
-          path.lineTo(this._position.x + 10, this._position.y + 20)
-          path.lineTo(this._position.x - 10, this._position.y + 20)
-          path.lineTo(this._position.x, this._position.y)
+          path.moveTo(0, 0)
+          path.lineTo(0 + this._size, 0 + this._size * 2)
+          path.lineTo(0 - this._size, 0 + this._size * 2)
+          path.lineTo(0, 0)
 
           this._svg.triangle
             .attr("d", path)
+            .attr(
+              "transform",
+              "translate(" + this._position.x + ", " + this._position.y + ") rotate(" + this._angle + ")")
             .style("fill", this._color)
+        }
+
+        /**
+         * scale()
+         * @description scale the size of the spaceship by a factor of scale
+         * @param amount the factor to scale the ship by
+         */
+        scale(amount) {
+          this._size *= amount;
+          let path = d3.path();
+
+          path.moveTo(0, 0)
+          path.lineTo(0 + this._size, 0 + this._size * 2)
+          path.lineTo(0 - this._size, 0 + this._size * 2)
+          path.lineTo(0, 0)
+
+          this._svg.triangle
+            .attr("d", path)
+            .attr(
+              "transform",
+              "translate(" + this._position.x + ", " + this._position.y + ") rotate(" + this._angle + ")")
         }
 
         /**
@@ -69,39 +98,115 @@ define(
            this._velocity.y += this._acceleration.y
          }
 
+
          /**
-          * moveTowards()
-          * @description move towards a given planet
-          * @param planet the planet to move towards
+          * orbit()
+          * @description orbits a particular planet
+          * @param time the current tick
           */
-         moveTowards(planet) {
+         orbit(time) {
+           // original code from here:
+           //   https://nbodyphysics.com/blog/2016/05/29/planetary-orbits-in-javascript/
+
+           var m = this._planet.mass + this.mass // combined mass of sun and planet
+           var e = 0.0; // effects the shape of the
+           let aOrbitRadius = this._planet.radius + this.size;
+
+           var LOOP_LIMIT = 10;
+
+           var orbitPeriod = 2.0 * Math.PI * Math.sqrt(Math.pow(aOrbitRadius, 3)/(m*m)); // G=1
+
+           // 1) find the relative time in the orbit and convert to Radians
+           let M = 2.0 * Math.PI * time/orbitPeriod;
+
+           // 2) Seed with mean anomaly and solve Kepler's eqn for E
+           let u = M; // seed with mean anomoly
+           let u_next = 0;
+           let loopCount = 0;
+           // iterate until within 10-6
+           while(loopCount++ < LOOP_LIMIT) {
+             // this should always converge in a small number of iterations - but be paranoid
+             u_next = u + (M - (u - e * Math.sin(u)))/(1 - e * Math.cos(u));
+             if (Math.abs(u_next - u) < 1E-6)
+                break;
+             u = u_next;
+           }
+
+            // 2) eccentric anomoly is angle from center of ellipse, not focus (where centerObject is). Convert
+            // to true anomoly, f - the angle measured from the focus. (see Fig 3.2 in Gravity)
+            var cos_f = (Math.cos(u) - e)/(1 - e * Math.cos(u));
+            var sin_f = (Math.sqrt(1 - e*e) * Math.sin (u))/(1 - e * Math.cos(u));
+            var r = aOrbitRadius * (1 - e*e)/(1 + e * cos_f);
+
+            // animate
+            //console.log(self._planets[0].position);
+            this.position = {
+              x: this._planet.position.x + r * cos_f,
+              y: this._planet.position.y + r * sin_f
+            }
+         }
+
+
+
+
+         /**
+          * travelTo()
+          * @description travel to a given planet
+          * @param planet the planet to travel to
+          */
+         travelTo(planet) {
            let dx = planet.position.x - this.position.x
            let dy = planet.position.y - this.position.y
-           let angle = Math.atan(dy, dx)
+           this._angle = Math.atan(dy, dx) * 180 / Math.PI
+           console.log(this._angle);
 
-           this._velocity.x = this._speed * Math.cos(angle)
-           this._velocity.y = this._speed * Math.sin(angle)
+           this._velocity.x = this._speed * Math.cos(this._angle)
+           this._velocity.y = this._speed * Math.sin(this._angle)
          }
+
+         /**
+          * displayPaths
+          * @description display the paths to the other planets in
+          *  the solar solar system.
+          * @param solarSystem the solar system this spaceship is in
+          */
 
         /********************************************************
                           Getters and Setters
         *********************************************************/
 
         /**
-         * get radius
-         * @description gets the radius of the planet
+         * get planet
+         * @description gets the current planet that this spaceship is orbiting
          */
-        get radius() {
-          return this._radius
+        get planet() {
+          return this._planet;
         }
 
         /**
-         * set radius
-         * @description sets the radius of the planet
-         * @param value the value to set the radius to
+         * set planet
+         * @description sets the current planet that this spaceship is orbiting
+         * @param value the planet to set the planet to
          */
-        set radius(value) {
-          this._radius = value
+        set planet(value) {
+          this._planet = value
+        }
+
+        /**
+         * get size
+         * @description gets the size of the planet
+         */
+        get size() {
+          return this._size
+        }
+
+        /**
+         * set size
+         * @description sets the size of the planet
+         * @param value the value to set the size to
+         */
+        set size(value) {
+          this._size = value
         }
 
         /**
@@ -120,9 +225,18 @@ define(
         set position(value) {
           this._position = value
 
-          this._svg.circle
-            .attr("cx", this._position.x)
-            .attr("cy", this._position.y)
+          let path = d3.path();
+
+          path.moveTo(0, 0)
+          path.lineTo(0 + this._size, 0 + this._size * 2)
+          path.lineTo(0 - this._size, 0 + this._size * 2)
+          path.lineTo(0, 0)
+
+          this._svg.triangle
+            .attr("d", path)
+            .attr(
+              "transform",
+              "translate(" + this._position.x + ", " + this._position.y + ") rotate(" + this._angle + ")")
         }
 
         /**
