@@ -1,6 +1,6 @@
 define(
-  ["d3"],
-  function(d3) {
+  ["d3", "game/PhysicsBody"],
+  function(d3, PhysicsBody) {
     /**
       Planet
     */
@@ -14,38 +14,13 @@ define(
          super(position, mass)
          this._solarSystem = null; // the solar system this planet is part of
          this._radius = radius; // the radius of the planet
-         this._aOrbitRadius = 80; // the distance from sun
-         this._bOrbitRadius = 80;
-         this._time = 0;
 
          this._selected = false;
 
          this._color = "red"
 
          let svg = d3.select("body").select("svg")
-         let defs = svg.append("defs");
 
-    		 //Create a radial Sun-like gradient
-    		 defs.append("radialGradient")
-          .attr("id", "planet-gradient")
-          .attr("cx", "75%")	//not really needed, since 50% is the default
-          .attr("cy", "50%")	//not really needed, since 50% is the default
-          .attr("r", "50%")	//not really needed, since 50% is the default
-          .selectAll("stop")
-          .data([
-          		{offset: "0%", color: "#FFF76B"},
-          		{offset: "50%", color: "#FFF845"},
-          		{offset: "90%", color: "#ba382f"},
-          		{offset: "100%", color: "#FB8933"}
-          	])
-          .enter().append("stop")
-          .attr("offset", function(d) { return d.offset; })
-          .attr("stop-color", function(d) { return d.color; });
-
-         this._svg = {
-           group: d3.create("svg:g")
-         }
-         this._svg["circle"] = this._svg.group.append("circle")
        }
 
 
@@ -87,51 +62,6 @@ define(
          orbitAround(celestialBody, radius) {
 
          }
-
-        /**
-         * update()
-         * @description updates this planet
-         */
-        update(time, solarSystem) {
-          // original code from here:
-          //   https://nbodyphysics.com/blog/2016/05/29/planetary-orbits-in-javascript/
-
-          var m = solarSystem.sun.mass + this.mass // combined mass of sun and planet
-          var e = 0.0; // effects the shape of the
-
-          var LOOP_LIMIT = 10;
-
-          var orbitPeriod = 2.0 * Math.PI * Math.sqrt(Math.pow(this.aOrbitRadius, 3)/(m*m)); // G=1
-
-          // 1) find the relative time in the orbit and convert to Radians
-          let M = 2.0 * Math.PI * time/orbitPeriod;
-
-          // 2) Seed with mean anomaly and solve Kepler's eqn for E
-          let u = M; // seed with mean anomoly
-          let u_next = 0;
-          let loopCount = 0;
-          // iterate until within 10-6
-          while(loopCount++ < LOOP_LIMIT) {
-            // this should always converge in a small number of iterations - but be paranoid
-            u_next = u + (M - (u - e * Math.sin(u)))/(1 - e * Math.cos(u));
-            if (Math.abs(u_next - u) < 1E-6)
-               break;
-            u = u_next;
-          }
-
-           // 2) eccentric anomoly is angle from center of ellipse, not focus (where centerObject is). Convert
-           // to true anomoly, f - the angle measured from the focus. (see Fig 3.2 in Gravity)
-           var cos_f = (Math.cos(u) - e)/(1 - e * Math.cos(u));
-           var sin_f = (Math.sqrt(1 - e*e) * Math.sin (u))/(1 - e * Math.cos(u));
-           var r = this.aOrbitRadius * (1 - e*e)/(1 + e * cos_f);
-
-           // animate
-           //console.log(self._planets[0].position);
-           this.position = {
-             x: solarSystem.sun.position.x + r * cos_f,
-             y: solarSystem.sun.position.y + r * sin_f
-           }
-        }
 
         /********************************************************
                           Getters and Setters
@@ -213,39 +143,7 @@ define(
           this._svg.circle.style("fill", value);
         }
 
-        /**
-         * get aOrbitRadius
-         * @description gets the aOrbitRadius of the planet
-         */
-        get aOrbitRadius() {
-          return this._aOrbitRadius
-        }
 
-        /**
-         * set aOrbitRadius
-         * @description sets the aOrbitRadius of the planet
-         * @param value the value to set the aOrbitRadius to
-         */
-        set aOrbitRadius(value) {
-          this._aOrbitRadius = value
-        }
-
-        /**
-         * get bOrbitRadius
-         * @description gets the bOrbitRadius of the planet
-         */
-        get bOrbitRadius() {
-          return this._bOrbitRadius
-        }
-
-        /**
-         * set bOrbitRadius
-         * @description sets the bOrbitRadius of the planet
-         * @param value the value to set the bOrbitRadius to
-         */
-        set bOrbitRadius(value) {
-          this._bOrbitRadius = value
-        }
 
         /**
          * set solarSystem

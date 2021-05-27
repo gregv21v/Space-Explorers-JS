@@ -1,28 +1,23 @@
-html, body {margin: 0; height: 100%; overflow: hidden}
 
-.menu {
-  display: block;
-  list-style-type: none;
-  text-align: center;
-  font-size: 35px;
+.propertiesPanel {
+  width: 25%;
+  height: 100%;
+  margin: 0;
+  background: white;
+  flex: 0.25;
 }
 
-.menu li:nth-child(even) {
-  background-color: #add8e6;
+.gamePanel {
+  width: 75%;
+  height: 100%;
+  margin: 0;
+  background: black;
+  flex: 0.75;
 }
 
-#main {
+.container {
+  margin: 0;
   display: flex;
-  flex-direction: row;
-}
-
-#middle, #left, #right {
-  display: flex;
-  flex-direction: column;
-}
-
-.resourceBar {
-
 }
 
 .noselect {
